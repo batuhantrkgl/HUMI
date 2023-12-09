@@ -30,7 +30,35 @@ body {
     width: 4%;
     border-radius: 100%;
     height: 4%;
- }
+}
+
+.go-up {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #434343;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    border-radius: 10px;
+    animation: fadeIn 0.5s ease-in-out forwards;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  .go-up:hover {
+    background-color: #212121;
+  }
 
 .social-media-links {
     font-family: 'Fira Mono', monospace;
@@ -45,9 +73,11 @@ body {
 
 .social-media-links p {
     cursor: pointer;
-    display: inline-block; /* Make the <p> elements inline-block to place them next to each other */
+    display: inline-block;
+    /* Make the <p> elements inline-block to place them next to each other */
     padding: 1vh;
-    margin: 0 10px; /* Add some margin to separate the links */
+    margin: 0 10px;
+    /* Add some margin to separate the links */
     background-color: #434343;
     border-radius: 30px;
 }
@@ -57,6 +87,20 @@ body {
     background-color: #545454;
     width: auto;
     border-radius: 30px;
+}
+
+
+.credits-footer {
+    margin-top: 1%;
+    font-family: 'Fira Mono', monospace;
+    text-align: center;
+}
+
+.credits-footer p {
+    font-size: smaller;
+    display: inline-block;
+    /* Make the <p> elements inline-block to place them next to each other */
+    color: #121212;
 }
 
 .other-teams {
@@ -75,9 +119,11 @@ body {
 
 .other-teams p {
     cursor: pointer;
-    display: inline-block; /* Make the <p> elements inline-block to place them next to each other */
+    display: inline-block;
+    /* Make the <p> elements inline-block to place them next to each other */
     padding: 1vh;
-    margin: 10px 10px; /* Add some margin to separate the links */
+    margin: 10px 10px;
+    /* Add some margin to separate the links */
     background-color: #434343;
     border-radius: 30px;
 }
@@ -95,7 +141,18 @@ body {
     padding: 1vh;
     color: white;
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Create 3 columns */
+    grid-template-columns: repeat(3, 1fr);
+    /* Create 3 columns */
+}
+
+.team-list-bottom {
+    text-align: center;
+    border-radius: 20px;
+    padding: 1vh;
+    color: white;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* Create 3 columns */
 }
 
 .top-row {
@@ -136,26 +193,13 @@ body {
 .teammate-name {
     color: lightskyblue;
 }
+
 .teammate-role {
     color: lightgreen;
     margin: 0;
 }
 
-.go-up {
-    float: right;
-    background-color: #434343;
-    color: #fff;
-    padding: 10px 15px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease-in-out;
-    border-radius: 10px;
-    
-}
 
-.go-up:hover {
-    background-color: #212121;
-}
 
 
 .paragraph {
