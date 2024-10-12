@@ -1,0 +1,48 @@
+{
+  "name": "humiapp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Batuhan Türkoğlu",
+    "email": "batuhanturkoglu37@gmail.com"
+  },
+  "license": "ISC",
+  "description": "A plant monitoring application using Electron and Arduino.",
+  "homepage": "https://github.com/batuhantrkgl/HUMI",
+  "devDependencies": {
+    "electron": "^32.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.batuhantrkgl-uhcal.humiapp",
+    "productName": "HumiApp",
+    "linux": {
+      "target": [
+        "deb",
+        "AppImage"
+      ],
+      "category": "Utility",
+      "maintainer": "Batuhan Türkoğlu <batuhanturkoglu37@gmail.com>"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  },
+  "dependencies": {
+    "@serialport/parser-readline": "^12.0.0",
+    "serialport": "^12.0.0"
+  }
+}
