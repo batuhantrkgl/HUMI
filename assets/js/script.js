@@ -138,6 +138,16 @@
     });
     }
 
+    function generateSimulatedSDData() {
+        const data = [];
+        for (let i = 0; i < 10; i++) {
+          const humidity = Math.floor(Math.random() * 100);
+          const timestamp = new Date().toISOString();
+          data.push({ timestamp, humidity });
+        }
+        return JSON.stringify(data);
+      }
+    
     function fetchPlantCareTips() {
         if (devMode) {
             // Simulate SD card data
