@@ -149,7 +149,7 @@
       }
     
       function sendToGeminiAPI(data) {
-        fetch('http://localhost:3000/generateContent', {
+        fetch('/api/proxy/generateContent', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
