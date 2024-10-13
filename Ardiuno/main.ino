@@ -6,6 +6,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <ArduinoJson.h>
+#include <HttpClient.h> // Include HttpClient library
 
 #define MAX_SENSORS 20
 #define DHTPIN 2 // DHT sensor connected to digital pin 2
@@ -22,6 +23,10 @@ const char* smtpServer = "smtp.your-email.com";
 const char* emailUser = "your-email@example.com";
 const char* emailPassword = "your-password";
 const char* recipientEmail = "owner-email@example.com";
+
+// Google Gemini API settings
+const char* geminiApiEndpoint = "https://api.google.comemini";
+const char* geminiApiKey = "YOUR_GEMINI_API_KEY";
 
 float recommendedHumidity[MAX_SENSORS] = {60.0, 60.0, 60.0}; // Recommended humidity for each plant
 int numSensors = 0;
@@ -67,6 +72,7 @@ void handleClient(EthernetClient& client) {
 }
 
 void processRequest(String& requestLine, EthernetClient& client) {
+    logToSD("Received request: " + requestLine);
     if (requestLine.startsWith("GET /humidity")) {
         sendHumidityData(client);
     } else if (requestLine.startsWith("GET /water")) {
@@ -82,7 +88,55 @@ void processRequest(String& requestLine, EthernetClient& client) {
         float offset = getCalibrationValue(requestLine);
         calibrateSensor(plantNum, offset);
         sendResponse(client, "Calibration set for plant " + String(plantNum) + ": " + String(offset));
+    } else if (requestLine.startsWith("GET /plant-care-tips")) {
+        sendPlantCareTips(client);
     }
+}
+
+void sendPlantCareTips(EthernetClient& client) {
+    String sdData = readSDCardData();
+    String geminiResponse = getGeminiResponse(sdData);
+
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-Type: text/plain");
+    client.println();
+    client.print(geminiResponse);
+}
+
+String readSDCardData() {
+    String data = "";
+    if (SD.exists("data.txt")) {
+        File dataFile = SD.open("data.txt");
+        if (dataFile) {
+            while (dataFile.available()) {
+                data += char(dataFile.read());
+            }
+            dataFile.close();
+        }
+    }
+    return data;
+}
+
+String getGeminiResponse(const String& data) {
+    HttpClient http;
+    http.begin(geminiApiEndpoint);
+    http.addHeader("Content-Type", "application/json");
+    http.addHeader("Authorization", "Bearer " + String(geminiApiKey));
+
+    StaticJsonDocument<1024> doc;
+    doc["data"] = data;
+    String requestBody;
+    serializeJson(doc, requestBody);
+
+    int httpResponseCode = http.POST(requestBody);
+    String response = "";
+    if (httpResponseCode > 0) {
+        response = http.getString();
+    } else {
+        response = "Error in sending request";
+    }
+    http.end();
+    return response;
 }
 
 void sendHumidityData(EthernetClient& client) {
@@ -92,11 +146,7 @@ void sendHumidityData(EthernetClient& client) {
         checkHumidity(i, humidity);
 
         // Log to SD card
-        File logFile = SD.open("log.txt", FILE_WRITE);
-        if (logFile) {
-            logFile.println(String(millis()) + "," + String(humidity));
-            logFile.close();
-        }
+        logToSD("Humidity for sensor " + String(i) + ": " + String(humidity));
 
         response += "{\"humidity\": " + String(humidity) + ", \"recommendedHumidity\": " + String(recommendedHumidity[i]) + "}";
         if (i < numSensors - 1) response += ",";
@@ -122,15 +172,18 @@ float getCalibrationValue(const String& request) {
 void calibrateSensor(int plantNum, float offset) {
     calibrationOffset[plantNum] = offset; // Store the calibration offset
     saveCalibration(); // Save calibration to SD card
+    logToSD("Calibrated sensor " + String(plantNum) + " with offset " + String(offset));
 }
 
 void waterPlant(int plantNum) {
     Serial.println("Watering plant " + String(plantNum));
+    logToSD("Watering plant " + String(plantNum));
     // Add your watering mechanism here
 }
 
 void toggleFan(int plantNum) {
     Serial.println("Toggling fan for plant " + String(plantNum));
+    logToSD("Toggling fan for plant " + String(plantNum));
     // Add your fan control mechanism here
 }
 
@@ -147,6 +200,9 @@ void sendEmailAlert(int plantIndex, float currentHumidity) {
     smtp.setBody("Plant " + String(plantIndex + 1) + " is out of range. Current: " + String(currentHumidity) + "%");
     if (!smtp.send()) {
         Serial.println("Failed to send email.");
+        logToSD("Failed to send email alert for plant " + String(plantIndex + 1));
+    } else {
+        logToSD("Email alert sent for plant " + String(plantIndex + 1) + " with humidity " + String(currentHumidity));
     }
 }
 
@@ -164,6 +220,7 @@ void loadConfig() {
                 }
             } else {
                 Serial.println("Failed to parse config file");
+                logToSD("Failed to parse config file");
             }
             configFile.close();
         }
@@ -203,4 +260,12 @@ void sendResponse(EthernetClient& client, const String& message) {
     client.println("Content-Type: text/plain");
     client.println();
     client.print(message);
+}
+
+void logToSD(const String& message) {
+    File logFile = SD.open("log.txt", FILE_WRITE);
+    if (logFile) {
+        logFile.println(String(millis()) + ": " + message);
+        logFile.close();
+    }
 }
