@@ -339,9 +339,9 @@
       // Existing functions
       function waterPlant(plantNumber) {
         if (devMode) {
-          alert(`Simulated: Watering Plant $ {plantNumber}`);
+          alert(`Simulated: Watering Plant ${plantNumber}`);
         } else {
-          fetch(`http://192.168.1.100/water?plant=$ {plantNumber}`)
+          fetch(`http://192.168.1.100/water?plant=${plantNumber}`)
             .then((response) => response.text())
             .then((data) => alert(data))
             .catch((error) => console.error("Error:", error));
@@ -350,9 +350,9 @@
 
       function toggleFan(plantNumber) {
         if (devMode) {
-          alert(`Simulated: Toggling Fan for Plant $ {plantNumber}`);
+          alert(`Simulated: Toggling Fan for Plant ${plantNumber}`);
         } else {
-          fetch(`http://192.168.1.100/fan?plant=$ {plantNumber}`)
+          fetch(`http://192.168.1.100/fan?plant=${plantNumber}`)
             .then((response) => response.text())
             .then((data) => alert(data))
             .catch((error) => console.error("Error:", error));
@@ -501,7 +501,7 @@
         }
 
         const datasets = humidityData.map((data, index) => ({
-          label: `Plant $ {index + 1}`,
+          label: `Plant ${index + 1}`,
           data: data,
           borderColor: colors[index % colors.length],
           backgroundColor: colors[index % colors.length].replace("1)", "0.2)"),
