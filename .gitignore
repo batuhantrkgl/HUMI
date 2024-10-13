@@ -1,3 +1,4 @@
 node_modules
 HumiApp/node_modules
 HumiApp/dist
+.vercel

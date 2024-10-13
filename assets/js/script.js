@@ -407,3 +407,8 @@ if (
 } else {
   document.body.classList.add("light");
 }
+
+// At the end of your script.js file, add this
+window.takePhoto = takePhoto;
+window.waterPlant = waterPlant;
+window.toggleFan = toggleFan;
