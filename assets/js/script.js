@@ -148,6 +148,22 @@
         return JSON.stringify(data);
       }
     
+      function sendToGeminiAPI(data) {
+        fetch('http://localhost:3000/generateContent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ contents: [{ parts: [{ text: data }] }] })
+        })
+          .then(response => response.json())
+          .then(data => {
+            const geminiResponse = data.candidates[0].content.parts[0].text;
+            document.getElementById("gemini-response").innerHTML = marked.parse(geminiResponse);
+          })
+          .catch(error => console.error("Error:", error));
+      }
+      
     function fetchPlantCareTips() {
         if (devMode) {
             // Simulate SD card data
