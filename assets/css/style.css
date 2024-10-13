@@ -164,15 +164,16 @@ footer {
     margin: 1rem 0;
 }
 
-
 body.light {
     background-color: #ffffff;
     color: black;
 }
+
 body.dark {
     background-color: #212121;
     color: white;
 }
+
 /* Button Styles */
 #theme-toggle {
     border: none;
@@ -188,19 +189,23 @@ body.dark {
     justify-content: center;
     margin-left: 10px; /* Space between text and button */
 }
+
 #theme-toggle:hover {
     transform: scale(1.1);
     background-color: #0056b3;
 }
+
 /* Animation */
 @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
 }
+
 .pulse-animation {
     animation: pulse 1.5s infinite;
 }
+
 .team-list {
     display: flex;
     justify-content: center;
@@ -210,6 +215,7 @@ body.dark {
     max-height: 400px;
     overflow-y: auto;
 }
+
 .alert-history {
     max-height: 60%;
     overflow-y: auto;
@@ -218,6 +224,7 @@ body.dark {
     border-radius: 10px;
     margin-top: 20px;
 }
+
 .alert-container {
     background-color: #ffcccb;
     color: #a00000;
@@ -225,10 +232,12 @@ body.dark {
     padding: 10px;
     margin: 5px 0;
 }
+
 #dashboard {
     display: flex;
     flex-wrap: wrap;
 }
+
 .widget {
     background-color: #434343;
     border: 1px solid #ccc;
@@ -240,9 +249,32 @@ body.dark {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s;
 }
+
 .widget:hover {
     background-color: #545454;
 }
+
 .drop-target {
     border: 2px dashed #ffcccb;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 600px) {
+    .nameholder-no-idea {
+        font-size: 4vh;
+    }
+
+    .team-member-container {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    .action-button {
+        font-size: 1rem;
+        padding: 5px;
+    }
+
+    #theme-toggle {
+        display: none;
+    }
 }
