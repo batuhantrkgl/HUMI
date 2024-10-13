@@ -4,13 +4,12 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
-const port = 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
 
 const geminiApiEndpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
-const geminiApiKey = ''; // Replace with your actual API key
+const geminiApiKey = process.env.GEMINI_API_KEY; // Use an environment variable
 
 // Simple root route
 app.get('/', (req, res) => {
@@ -18,7 +17,7 @@ app.get('/', (req, res) => {
 });
 
 // Route to generate content
-app.post('/generateContent', async (req, res) => {
+app.post('/api/proxy/generateContent', async (req, res) => {
   try {
     const response = await axios.post(`${geminiApiEndpoint}?key=${geminiApiKey}`, req.body, {
       headers: {
@@ -32,6 +31,5 @@ app.post('/generateContent', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Proxy server running at http://localhost:${port}`);
-});
+// Export the app for Vercel
+module.exports = app;
