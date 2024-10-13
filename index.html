@@ -129,8 +129,8 @@
         #theme-toggle {
             border: none;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 40px; /* Adjusted size for mobile */
+            height: 40px; /* Adjusted size for mobile */
             background-color: #007bff;
             color: white;
             cursor: pointer;
@@ -138,6 +138,7 @@
             align-items: center;
             justify-content: center;
             margin-left: 10px; /* Space between text and button */
+            transition: background-color 0.3s; /* Smooth transition */
         }
 
         #theme-toggle:hover {
@@ -187,9 +188,16 @@
             'rgba(255, 159, 64, 1)',
         ];
 
-        // Theme Toggle
-        const themeToggle = document.getElementById('theme-toggle');
-        let currentTheme = localStorage.getItem('theme') || 'dark';
+   // Theme Toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    let currentTheme = localStorage.getItem('theme');
+
+    // Detect system theme and set it
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    if (!currentTheme) {
+            currentTheme = systemTheme; // Use system theme if no preference is set
+        }
+
         document.body.classList.add(currentTheme);
         updateToggleIcon(currentTheme); // Set initial icon
 
@@ -205,6 +213,13 @@
             themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
         }
 
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            currentTheme = e.matches ? 'dark' : 'light';
+            document.body.className = currentTheme;
+            localStorage.setItem('theme', currentTheme);
+            updateToggleIcon(currentTheme);
+        });
         // Save dashboard layout
         function saveLayout() {
             const layout = [...document.querySelectorAll('.widget')].map(widget => widget.id);
