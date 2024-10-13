@@ -1,493 +1,541 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HUMI</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: 'Mont', sans-serif;
-            font-weight: 600;
-            margin: 0;
-            padding: 2%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #212121; /* Default dark mode background */
-            color: white; /* Default text color */
-        }
-
-        .light {
-            background-color: #ffffff; /* Light mode background */
-            color: black; /* Light mode text color */
-        }
-
-        .nameholder-no-idea {
-            font-size: 6vh;
-            margin: 1rem 0;
-        }
-
-        .team-list {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 2rem 0;
-            width: 100%;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .team-member-container {
-            background-color: #434343;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 10px;
-            width: calc(50% - 20px); /* Adjusted for better responsiveness */
-            max-width: 300px; /* Optional max width */
-            transition: background-color 0.3s, transform 0.3s;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .team-member-info {
-            text-align: left;
-        }
-
-        .teammate-name {
-            color: lightskyblue;
-            font-weight: bold;
-            margin: 0.5rem 0;
-        }
-
-        .widget {
-            background-color: #434343;
-            border: 1px solid #ccc;
-            margin: 10px;
-            padding: 20px;
-            flex: 1 1 30%;
-            cursor: move;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s;
-        }
-
-        #humidityChart {
-            margin-top: 20px;
-            max-width: 100%;
-            width: 100%;
-        }
-
-        .alert-container {
-            background-color: #ffcccb;
-            color: #a00000;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 5px 0;
-        }
-
-        .credits-footer {
-            text-align: center;
-            margin-top: 2rem;
-            padding: 1rem;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 10px;
-        }
-
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            .team-member-container {
-                width: calc(100% - 20px); /* Full width on mobile */
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>HUMI</title>
+        <link rel="stylesheet" href="assets/css/style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+            body {
+                font-family: 'Mont', sans-serif;
+                font-weight: 600;
+                margin: 0;
+                padding: 2%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                background-color: #212121; /* Default dark mode background */
+                color: white; /* Default text color */
             }
 
-            .widget {
-                flex: 1 1 100%; /* Full width for widgets on mobile */
+            .light {
+                background-color: #ffffff; /* Light mode background */
+                color: black; /* Light mode text color */
             }
 
             .nameholder-no-idea {
-                font-size: 5vh; /* Smaller font size on smaller screens */
+                font-size: 6vh;
+                margin: 1rem 0;
             }
 
-            .action-button {
-                font-size: 1.2rem; /* Smaller button size on mobile */
+            .team-list {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                margin: 2rem 0;
+                width: 100%;
+                max-height: 400px;
+                overflow-y: auto;
             }
-        }
 
-        @media (max-width: 480px) {
-            .action-button {
-                padding: 8px; /* Smaller padding on buttons */
-                font-size: 1rem; /* Even smaller font size */
+            .team-member-container {
+                background-color: #434343;
+                padding: 20px;
+                border-radius: 10px;
+                margin: 10px;
+                width: calc(50% - 20px); /* Adjusted for better responsiveness */
+                max-width: 300px; /* Optional max width */
+                transition: background-color 0.3s, transform 0.3s;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             }
-        }
 
-        #theme-toggle {
-            border: none;
-            border-radius: 50%;
-            width: 40px; /* Adjusted size for mobile */
-            height: 40px; /* Adjusted size for mobile */
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 10px; /* Space between text and button */
-            transition: background-color 0.3s; /* Smooth transition */
-        }
-
-        #theme-toggle:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
-    <div style="display: flex; align-items: center;">
-        <p class="nameholder-no-idea">HUMI - Bitki Bilgi Sistemi</p>
-        <button id="theme-toggle" class="pulse-animation"><i class="fas fa-adjust"></i></button>
-    </div>
-    <p class="paragraph">Today Is <span id="current-day"></span></p>
-    <div class="team-list" id="plant-list"></div>
-    <canvas id="humidityChart" width="400" height="200"></canvas>
-    <div id="dashboard">
-        <div class="widget" id="humidity-chart" draggable="true">Humidity Chart</div>
-        <div class="widget" id="alert-history" draggable="true">
-            <h4>Alert History</h4>
-            <div id="alert-list"></div>
-        </div>
-        <div class="widget" id="plant-care-tips" draggable="true">
-            <h4>Plant Care Tips</h4>
-            <textarea id="tip-input" placeholder="Share your plant care tip..." rows="3"></textarea>
-            <button onclick="submitTip()">Submit</button>
-            <div id="tips-list"></div>
-        </div>
-    </div>
-
-    <footer>
-        <div class="credits-footer">
-            <p>Made By Batuhantrkgl@AlrightStudios <br> 2024-2025 All Rights Reserved. <br> Based on DGO.Robotics's Team Website.</p>
-        </div>
-    </footer>
-
-    <script>
-        const devMode = true; // Enable developer mode
-        const timestamps = [];
-        const humidityData = [];
-        const alertHistory = []; // Keeps all alerts
-        const careTips = []; // Store user-generated tips
-        const colors = [
-            'rgba(75, 192, 192, 1)',
-            'rgba(255, 99, 132, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 159, 64, 1)',
-        ];
-
-   // Theme Toggle
-    const themeToggle = document.getElementById('theme-toggle');
-    let currentTheme = localStorage.getItem('theme');
-
-    // Detect system theme and set it
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    if (!currentTheme) {
-            currentTheme = systemTheme; // Use system theme if no preference is set
-        }
-
-        document.body.classList.add(currentTheme);
-        updateToggleIcon(currentTheme); // Set initial icon
-
-        themeToggle.addEventListener('click', () => {
-            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.body.className = currentTheme;
-            localStorage.setItem('theme', currentTheme);
-            updateToggleIcon(currentTheme);
-        });
-
-        function updateToggleIcon(theme) {
-            const icon = theme === 'dark' ? 'fa-moon' : 'fa-sun';
-            themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
-        }
-
-        // Listen for system theme changes
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-            currentTheme = e.matches ? 'dark' : 'light';
-            document.body.className = currentTheme;
-            localStorage.setItem('theme', currentTheme);
-            updateToggleIcon(currentTheme);
-        });
-        // Save dashboard layout
-        function saveLayout() {
-            const layout = [...document.querySelectorAll('.widget')].map(widget => widget.id);
-            localStorage.setItem('dashboardLayout', JSON.stringify(layout));
-        }
-
-        // Load dashboard layout
-        function loadLayout() {
-            const layout = JSON.parse(localStorage.getItem('dashboardLayout'));
-            if (layout) {
-                const dashboard = document.getElementById('dashboard');
-                layout.forEach(id => {
-                    const widget = document.getElementById(id);
-                    dashboard.appendChild(widget); // Reorder widgets
-                });
+            .team-member-info {
+                text-align: left;
             }
-        }
 
-        const dashboard = document.getElementById('dashboard');
-        let draggedWidget = null;
-
-        dashboard.addEventListener('dragstart', (e) => {
-            if (e.target.classList.contains('widget')) {
-                draggedWidget = e.target;
-                e.target.style.opacity = 0.5; // Reduce opacity of dragged widget
+            .teammate-name {
+                color: lightskyblue;
+                font-weight: bold;
+                margin: 0.5rem 0;
             }
-        });
 
-        dashboard.addEventListener('dragend', (e) => {
-            e.target.style.opacity = ""; // Reset opacity
-            draggedWidget = null;
-            removeDropTargets(); // Clear drop targets
-        });
-
-        dashboard.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            if (e.target.classList.contains('widget')) {
-                e.target.classList.add('drop-target'); // Highlight drop target
+            .widget {
+                background-color: #434343;
+                border: 1px solid #ccc;
+                margin: 10px;
+                padding: 20px;
+                flex: 1 1 30%;
+                cursor: move;
+                border-radius: 10px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                transition: background-color 0.3s;
             }
-        });
 
-        dashboard.addEventListener('dragleave', (e) => {
-            if (e.target.classList.contains('widget')) {
-                e.target.classList.remove('drop-target'); // Remove highlight
+            #humidityChart {
+                margin-top: 20px;
+                max-width: 100%;
+                width: 100%;
             }
-        });
 
-        dashboard.addEventListener('drop', (e) => {
-            e.preventDefault();
-            if (e.target.classList.contains('widget') && draggedWidget) {
-                dashboard.insertBefore(draggedWidget, e.target.nextSibling);
-                saveLayout(); // Save layout on drop
+            .alert-container {
+                background-color: #ffcccb;
+                color: #a00000;
+                border-radius: 5px;
+                padding: 10px;
+                margin: 5px 0;
             }
-            removeDropTargets(); // Clear drop targets
-        });
 
-        function removeDropTargets() {
-            const dropTargets = document.querySelectorAll('.drop-target');
-            dropTargets.forEach(target => {
-                target.classList.remove('drop-target'); // Remove highlight
-            });
-        }
-
-        function submitTip() {
-            const tipInput = document.getElementById('tip-input');
-            const tip = tipInput.value.trim();
-            if (tip) {
-                careTips.push(tip);
-                tipInput.value = '';
-                updateTipsList();
+            .credits-footer {
+                text-align: center;
+                margin-top: 2rem;
+                padding: 1rem;
             }
-        }
 
-        function updateTipsList() {
-            const tipsList = document.getElementById('tips-list');
-            tipsList.innerHTML = ''; // Clear previous tips
-            careTips.forEach(tip => {
-                const tipItem = document.createElement('div');
-                tipItem.textContent = tip;
-                tipsList.appendChild(tipItem);
-            });
-        }
-
-        // Existing functions
-        function waterPlant(plantNumber) {
-            if (devMode) {
-                alert(`Simulated: Watering Plant ${plantNumber}`);
-            } else {
-                fetch(`http://192.168.1.100/water?plant=${plantNumber}`)
-                    .then(response => response.text())
-                    .then(data => alert(data))
-                    .catch(error => console.error('Error:', error));
+            .button-container {
+                display: flex;
+                justify-content: space-around;
+                margin-top: 10px;
             }
-        }
 
-        function toggleFan(plantNumber) {
-            if (devMode) {
-                alert(`Simulated: Toggling Fan for Plant ${plantNumber}`);
-            } else {
-                fetch(`http://192.168.1.100/fan?plant=${plantNumber}`)
-                    .then(response => response.text())
-                    .then(data => alert(data))
-                    .catch(error => console.error('Error:', error));
-            }
-        }
 
-        function takePhoto() {
-            alert("Fotoğraf çekme özelliği henüz eklenmedi.");
-        }
-
-        function updateHumidity() {
-            const currentTime = new Date().toLocaleTimeString();
-            const plantList = document.getElementById('plant-list');
-            const scrollPosition = plantList.scrollTop;
-
-            if (devMode) {
-                const mockData = [];
-                for (let i = 0; i < colors.length; i++) {
-                    const humidity = Math.floor(Math.random() * 100);
-                    mockData.push({ humidity: humidity, recommendedHumidity: 60 });
-                    if (!humidityData[i]) {
-                        humidityData[i] = [];
-                    }
-                    humidityData[i].push(humidity);
-                    checkAndLogAlert(i, humidity);
+            /* Responsive Styles */
+            @media (max-width: 768px) {
+                .team-member-container {
+                    width: calc(100% - 20px); /* Full width on mobile */
                 }
-                renderPlants(mockData);
-                timestamps.push(currentTime);
-                updateChart(false);
-            } else {
-                fetch('http://192.168.1.100/humidity')
-                    .then(response => response.json())
-                    .then(data => {
-                        renderPlants(data);
-                        data.forEach((plant, index) => {
-                            if (!humidityData[index]) {
-                                humidityData[index] = [];
-                            }
-                            humidityData[index].push(plant.humidity);
-                            checkAndLogAlert(index, plant.humidity);
+
+                .widget {
+                    flex: 1 1 100%; /* Full width for widgets on mobile */
+                }
+
+                .nameholder-no-idea {
+                    font-size: 5vh; /* Smaller font size on smaller screens */
+                }
+
+                .action-button {
+                    font-size: 1.2rem; /* Smaller button size on mobile */
+                }
+            }
+
+            @media (max-width: 480px) {
+                .action-button {
+                    padding: 8px; /* Smaller padding on buttons */
+                    font-size: 1rem; /* Even smaller font size */
+                }
+            }
+
+            #theme-toggle {
+                border: none;
+                border-radius: 50%;
+                width: 40px; /* Adjusted size for mobile */
+                height: 40px; /* Adjusted size for mobile */
+                background-color: #007bff;
+                color: white;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-left: 10px; /* Space between text and button */
+                transition: background-color 0.3s; /* Smooth transition */
+            }
+
+            #theme-toggle:hover {
+                background-color: #0056b3;
+            }
+            @media (max-width: 600px) {
+                #theme-toggle {
+                    display: none; /* Hide toggle on mobile */
+                }
+            }
+
+        </style>
+    </head>
+    <body>
+        <div style=" display: flex; align-items: center;">
+            <p class="nameholder-no-idea">HUMI - Bitki Bilgi Sistemi</p>
+            <button id="theme-toggle" class="pulse-animation"><i class="fas fa-adjust"></i></button>
+        </div>
+        <p class="paragraph">Today Is <span id="current-day"></span></p>
+        <div class="team-list" id="plant-list"></div>
+        <canvas id="humidityChart" width="400" height="200"></canvas>
+        <div id="dashboard">
+            <div class="widget" id="humidity-chart" draggable="true">Humidity Chart</div>
+            <div class="widget" id="alert-history" draggable="true">
+                <h4>Alert History</h4>
+                <div id="alert-list"></div>
+            </div>
+            <div class="widget" id="plant-care-tips" draggable="true">
+                <h4>Plant Care Tips</h4>
+                <textarea id="tip-input" placeholder="Share your plant care tip..." rows="3"></textarea>
+                <button onclick="submitTip()">Submit</button>
+                <div id="tips-list"></div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="credits-footer">
+                <p>Made By Batuhantrkgl@AlrightStudios <br> 2024-2025 All Rights Reserved. <br> Based on DGO.Robotics's Team Website.</p>
+            </div>
+        </footer>
+
+        <script>
+                const devMode = true; // Enable developer mode
+                const timestamps = [];
+                const humidityData = [];
+                const alertHistory = []; // Keeps all alerts
+                const careTips = []; // Store user-generated tips
+                const colors = [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 159, 64, 1)',
+                ];
+
+                const themeToggle = document.getElementById('theme-toggle');
+                let currentTheme = localStorage.getItem('theme');
+
+                // Detect system theme and set it
+                const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                if (!currentTheme) {
+                    currentTheme = systemTheme; // Use system theme if no preference is set
+                }
+
+                function updateToggleIcon(theme) {
+                    if (theme === 'dark') {
+                        themeToggle.innerHTML = '<i class="fas fa-sun"></i>'; // Sun icon for light mode
+                    } else {
+                        themeToggle.innerHTML = '<i class="fas fa-moon"></i>'; // Moon icon for dark mode
+                    }
+                }
+
+                document.body.classList.add(currentTheme);
+                updateToggleIcon(currentTheme); // Set initial icon
+
+                if (window.matchMedia("(max-width: 600px)").matches) {
+
+                    // Do not attach event listener for mobile
+                } else {
+                    themeToggle.addEventListener('click', () => {
+                        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                        document.body.className = currentTheme;
+                        localStorage.setItem('theme', currentTheme);
+                        updateToggleIcon(currentTheme);
+                    });
+                }
+
+                // Listen for system theme changes
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                    currentTheme = e.matches ? 'dark' : 'light';
+                    document.body.className = currentTheme;
+                    localStorage.setItem('theme', currentTheme);
+                    updateToggleIcon(currentTheme);
+                });
+                // Save dashboard layout
+                function saveLayout() {
+                    const layout = [...document.querySelectorAll('.widget')].map(widget => widget.id);
+                    localStorage.setItem('dashboardLayout', JSON.stringify(layout));
+                }
+
+                // Load dashboard layout
+                function loadLayout() {
+                    const layout = JSON.parse(localStorage.getItem('dashboardLayout'));
+                    if (layout) {
+                        const dashboard = document.getElementById('dashboard');
+                        layout.forEach(id => {
+                            const widget = document.getElementById(id);
+                            dashboard.appendChild(widget); // Reorder widgets
                         });
+                    }
+                }
+
+                const dashboard = document.getElementById('dashboard');
+                let draggedWidget = null;
+
+                dashboard.addEventListener('dragstart', (e) => {
+                    if (e.target.classList.contains('widget')) {
+                        draggedWidget = e.target;
+                        e.target.style.opacity = 0.5; // Reduce opacity of dragged widget
+                    }
+                });
+
+                dashboard.addEventListener('dragend', (e) => {
+                    e.target.style.opacity = ""; // Reset opacity
+                    draggedWidget = null;
+                    removeDropTargets(); // Clear drop targets
+                });
+
+                dashboard.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (e.target.classList.contains('widget')) {
+                        e.target.classList.add('drop-target'); // Highlight drop target
+                    }
+                });
+
+                dashboard.addEventListener('dragleave', (e) => {
+                    if (e.target.classList.contains('widget')) {
+                        e.target.classList.remove('drop-target'); // Remove highlight
+                    }
+                });
+
+                dashboard.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (e.target.classList.contains('widget') && draggedWidget) {
+                        dashboard.insertBefore(draggedWidget, e.target.nextSibling);
+                        saveLayout(); // Save layout on drop
+                    }
+                    removeDropTargets(); // Clear drop targets
+                });
+
+                function removeDropTargets() {
+                    const dropTargets = document.querySelectorAll('.drop-target');
+                    dropTargets.forEach(target => {
+                        target.classList.remove('drop-target'); // Remove highlight
+                    });
+                }
+
+                function submitTip() {
+                    const tipInput = document.getElementById('tip-input');
+                    const tip = tipInput.value.trim();
+                    if (tip) {
+                        careTips.push(tip);
+                        tipInput.value = '';
+                        updateTipsList();
+                    }
+                }
+
+                function updateTipsList() {
+                    const tipsList = document.getElementById('tips-list');
+                    tipsList.innerHTML = ''; // Clear previous tips
+                    careTips.forEach(tip => {
+                        const tipItem = document.createElement('div');
+                        tipItem.textContent = tip;
+                        tipsList.appendChild(tipItem);
+                    });
+                }
+
+                // Existing functions
+                function waterPlant(plantNumber) {
+                    if (devMode) {
+                        alert(`Simulated: Watering Plant $ {plantNumber}`);
+                    } else {
+                        fetch(`http://192.168.1.100/water?plant=$ {plantNumber}`)
+                            .then(response => response.text())
+                            .then(data => alert(data))
+                            .catch(error => console.error('Error:', error));
+                    }
+                }
+
+                function toggleFan(plantNumber) {
+                    if (devMode) {
+                        alert(`Simulated: Toggling Fan for Plant $ {plantNumber}`);
+                    } else {
+                        fetch(`http://192.168.1.100/fan?plant=$ {plantNumber}`)
+                            .then(response => response.text())
+                            .then(data => alert(data))
+                            .catch(error => console.error('Error:', error));
+                    }
+                }
+
+                function takePhoto() {
+                    alert("Fotoğraf çekme özelliği henüz eklenmedi.");
+                }
+
+                function updateHumidity() {
+                    const currentTime = new Date().toLocaleTimeString();
+                    const plantList = document.getElementById('plant-list');
+                    const scrollPosition = plantList.scrollTop;
+
+                    if (devMode) {
+                        const mockData = [];
+                        for (let i = 0; i < colors.length; i++) {
+                            const humidity = Math.floor(Math.random() * 100);
+                            mockData.push({ humidity: humidity, recommendedHumidity: 60 });
+                            if (!humidityData[i]) {
+                                humidityData[i] = [];
+                            }
+                            humidityData[i].push(humidity);
+                            checkAndLogAlert(i, humidity);
+                        }
+                        renderPlants(mockData);
                         timestamps.push(currentTime);
                         updateChart(false);
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
+                    } else {
+                        fetch('http://192.168.1.100/humidity')
+                            .then(response => response.json())
+                            .then(data => {
+                                renderPlants(data);
+                                data.forEach((plant, index) => {
+                                    if (!humidityData[index]) {
+                                        humidityData[index] = [];
+                                    }
+                                    humidityData[index].push(plant.humidity);
+                                    checkAndLogAlert(index, plant.humidity);
+                                });
+                                timestamps.push(currentTime);
+                                updateChart(false);
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
 
-            plantList.scrollTop = scrollPosition;
-        }
-
-        function renderPlants(data) {
-            const plantList = document.getElementById('plant-list');
-            plantList.innerHTML = '';
-
-            data.forEach((plant, index) => {
-                const plantContainer = document.createElement('div');
-                plantContainer.classList.add('team-member-container');
-
-                const humidity = plant.humidity;
-                const recommended = plant.recommendedHumidity;
-                const alertMessage = checkHumidity(index, humidity, recommended);
-
-                if (alertMessage) {
-                    plantContainer.classList.add('alert');
+                    plantList.scrollTop = scrollPosition;
                 }
 
-                const plantInfo = `
-                    <div class="team-member-info">
-                        <p class="teammate-name">Bitki ${index + 1}</p>
-                        <p>Nem Durumu: <span id="humidity-${index + 1}">${humidity}%</span></p>
-                        <p>Önerilen Nem: <span>${recommended}%</span></p>
-                        ${alertMessage ? `<p class="alert">${alertMessage}</p>` : ''}
-                        <div class="button-container">
-                            <button class="action-button" onclick="takePhoto()">
-                                <i class="fas fa-camera"></i>
-                            </button>
-                            <button class="action-button" onclick="waterPlant(${index + 1})">
-                                <i class="fas fa-water"></i>
-                            </button>
-                            <button class="action-button" onclick="toggleFan(${index + 1})">
-                                <i class="fas fa-fan"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                plantContainer.innerHTML = plantInfo;
-                plantList.appendChild(plantContainer);
-            });
-        }
+                function renderPlants(data) {
+                    const plantList = document.getElementById('plant-list');
+                    plantList.innerHTML = '';
 
-        function checkHumidity(index, humidity, recommended) {
-            if (humidity < (recommended - 10) || humidity > (recommended + 10)) {
-                return `Uyarı: Bitki ${index + 1} nem seviyesi uygun değil! (${humidity}%)`;
-            }
-            return '';
-        }
+                    data.forEach((plant, index) => {
+                        const plantContainer = document.createElement('div');
+                        plantContainer.classList.add('team-member-container');
 
-        function checkAndLogAlert(index, humidity) {
-            const recommendedHumidity = 60; // Replace with dynamic value if needed
-            if (humidity < (recommendedHumidity - 10) || humidity > (recommendedHumidity + 10)) {
-                const alertMessage = `Bitki ${index + 1}: Nem seviyesi ${humidity}%`;
-                alertHistory.unshift(alertMessage); // Add the new alert at the beginning
-                updateAlertHistory();
-            }
-        }
+                        const humidity = plant.humidity;
+                        const recommended = plant.recommendedHumidity;
+                        const alertMessage = checkHumidity(index, humidity, recommended);
 
-        function updateAlertHistory() {
-            const alertList = document.getElementById('alert-list');
-            alertList.innerHTML = ''; // Clear previous alerts
-            alertHistory.forEach(alert => {
-                const alertItem = document.createElement('div');
-                alertItem.className = 'alert-container';
-                alertItem.textContent = alert;
-                alertList.appendChild(alertItem);
-            });
-        }
-
-        function updateChart(isInitialLoad) {
-            const ctx = document.getElementById('humidityChart').getContext('2d');
-
-            if (window.humidityChart instanceof Chart) {
-                window.humidityChart.destroy();
-            }
-
-            const datasets = humidityData.map((data, index) => ({
-                label: `Plant ${index + 1}`,
-                data: data,
-                borderColor: colors[index % colors.length],
-                backgroundColor: colors[index % colors.length].replace('1)', '0.2)'),
-                fill: true,
-            }));
-
-            window.humidityChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: timestamps,
-                    datasets: datasets,
-                },
-                options: {
-                    animations: isInitialLoad ? { tension: { duration: 500, easing: 'linear', from: 1, to: 0, loop: false } } : false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Humidity (%)'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Time'
-                            }
+                        if (alertMessage) {
+                            plantContainer.classList.add('alert');
                         }
+
+                        const plantInfo = `
+                                <div class="team-member-info">
+                                    <p class="teammate-name">Bitki $ {
+            index + 1
+            }</p>
+                                    <p>Nem Durumu: <span id="humidity-$ {
+            index + 1
+            }">$ {
+            humidity
+            }%</span></p>
+                                    <p>Önerilen Nem: <span>$ {
+            recommended
+            }%</span></p>
+                                    $ {
+            alertMessage ? `<p class="alert">$ {alertMessage}</p>` : ''
+            }
+                                    <div class="button-container">
+                                        <button class="action-button" onclick="takePhoto()">
+                                            <i class="fas fa-camera"></i>
+                                        </button>
+                                        <button class="action-button" onclick="waterPlant($ {
+            index + 1
+            })">
+                                            <i class="fas fa-water"></i>
+                                        </button>
+                                        <button class="action-button" onclick="toggleFan($ {
+            index + 1
+            })">
+                                            <i class="fas fa-fan"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        plantContainer.innerHTML = plantInfo;
+                        plantList.appendChild(plantContainer);
+                    });
+                }
+
+                function checkHumidity(index, humidity, recommended) {
+                    if (humidity < (recommended - 10) || humidity > (recommended + 10)) {
+                        return `Uyarı: Bitki $ {index + 1} nem seviyesi uygun değil! ($ {humidity}%)`;
+                    }
+                    return '';
+                }
+
+                function checkAndLogAlert(index, humidity) {
+                    const recommendedHumidity = 60; // Replace with dynamic value if needed
+                    if (humidity < (recommendedHumidity - 10) || humidity > (recommendedHumidity + 10)) {
+                        const alertMessage = `Bitki $ {index + 1}: Nem seviyesi $ {humidity}%`;
+                        alertHistory.unshift(alertMessage); // Add the new alert at the beginning
+                        if (alertHistory.length > 10) {
+                            alertHistory.pop(); // Keep only the last 10 alerts
+                        }
+                        updateAlertHistory();
                     }
                 }
-            });
-        }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            loadLayout(); // Load layout on page load
-            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-            const today = new Date();
-            document.getElementById('current-day').textContent = days[today.getDay()];
+                function updateAlertHistory() {
+                    const alertList = document.getElementById('alert-list');
+                    alertList.innerHTML = ''; // Clear previous alerts
+                    alertHistory.forEach(alert => {
+                        const alertItem = document.createElement('div');
+                        alertItem.className = 'alert-container';
+                        alertItem.textContent = alert;
+                        alertItem.onclick = () => deleteAlert(alert);
+                        alertList.appendChild(alertItem);
+                    });
+                }
 
-            setInterval(updateHumidity, 3000); // Update every 3 seconds
-            updateHumidity(); // Initial load
-        });
-    </script>
-</body>
+
+                function deleteAlert(alertMessage) {
+                    const index = alertHistory.indexOf(alertMessage);
+                    if (index > -1) {
+                        alertHistory.splice(index, 1);
+                        updateAlertHistory(); // Update displayed alerts
+                    }
+                }
+
+
+                function updateChart(isInitialLoad) {
+                    const ctx = document.getElementById('humidityChart').getContext('2d');
+
+                    if (window.humidityChart instanceof Chart) {
+                        window.humidityChart.destroy();
+                    }
+
+                    const datasets = humidityData.map((data, index) => ({
+                        label: `Plant $ {index + 1}`,
+                        data: data,
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length].replace('1)', '0.2)'),
+                        fill: true,
+                    }));
+
+                    window.humidityChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: timestamps,
+                            datasets: datasets,
+                        },
+                        options: {
+                            animations: isInitialLoad ? { tension: { duration: 500, easing: 'linear', from: 1, to: 0, loop: false } } : false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Humidity (%)'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Time'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    loadLayout(); // Load layout on page load
+                    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                    const today = new Date();
+                    document.getElementById('current-day').textContent = days[today.getDay()];
+
+                    setInterval(updateHumidity, 3000); // Update every 3 seconds
+                    updateHumidity(); // Initial load
+                });
+                // Automatically follow system theme on mobile
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.body.classList.add('dark');
+                } else {
+                    document.body.classList.add('light');
+                }
+        </script>
+    </body>
 </html>
