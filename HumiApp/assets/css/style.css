@@ -7,14 +7,7 @@ body {
     padding: 2%;
     display: flex;
     flex-direction: column;
-    align-items: center; /* İçerikleri yatayda ortalar */
-    justify-content: center; /* İçerikleri dikeyde ortalar */
-    height: 100vh; /* Tam ekran yüksekliği */
-}
-
-h1, h2 {
-    text-align: center;
-    color: #e0e0e0;
+    align-items: center;
 }
 
 .nameholder-no-idea {
@@ -22,24 +15,12 @@ h1, h2 {
     margin: 1rem 0;
 }
 
-.header {
-    padding: 2rem 0;
-}
-
-.greeting {
-    font-size: 1.5rem; /* Font boyutunu ayarla */
-    color: #b0b0b0; /* Daha yumuşak bir renk */
-    text-align: center; /* Metni ortala */
-    margin: 0.5rem 0 2rem; /* Marjı ayarla */
-    font-weight: 400; /* Daha hafif yazı ağırlığı */
-}
-
 .team-list {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     margin: 2rem 0;
-    text-align: center; /* İçeriği ortala */
+    width: 100%;
 }
 
 .team-member-container {
@@ -50,40 +31,18 @@ h1, h2 {
     width: 250px;
     transition: background-color 0.3s, transform 0.3s;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.5s;
 }
 
-.team-member-info {
-    text-align: left; /* Bilgileri sola hizala */
-}
-
-.teammate-name {
-    color: lightskyblue;
-    font-weight: bold;
-    margin: 0.5rem 0;
-}
-
-.teammate-role {
-    color: lightgreen;
-    margin: 0;
-}
-
-.status-indicator {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.status-green {
-    background-color: green;
-}
-
-.status-orange {
-    background-color: orange;
-}
-
-.status-red {
-    background-color: red;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .button-container {
@@ -109,20 +68,11 @@ h1, h2 {
     transform: scale(1.05);
 }
 
-.action-button i {
-    pointer-events: none;
-}
-
 .credits-footer {
     text-align: center;
     margin-top: 2rem;
     padding: 1rem;
     border-radius: 10px;
-}
-
-.credits-footer p {
-    font-size: smaller;
-    color: #616161;
 }
 
 footer {

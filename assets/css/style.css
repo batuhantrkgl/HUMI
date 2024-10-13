@@ -1,15 +1,24 @@
+:root {
+    --background-color: #212121; /* Dark mode background */
+    --font-color: white; /* Dark mode font color */
+    --alert-background: rgba(255, 0, 0, 0.2); /* Alert background */
+}
+
 body {
-    background-color: #212121;
+    background-color: var(--background-color);
     font-family: 'Mont', sans-serif;
     font-weight: 600;
-    color: white;
+    color: var(--font-color);
     margin: 0;
     padding: 2%;
     display: flex;
     flex-direction: column;
-    align-items: center; /* İçerikleri yatayda ortalar */
-    justify-content: center; /* İçerikleri dikeyde ortalar */
-    height: 100vh; /* Tam ekran yüksekliği */
+    align-items: center;
+}
+
+body.light {
+    --background-color: #ffffff; /* Light mode background */
+    --font-color: black; /* Light mode font color */
 }
 
 h1, h2 {
@@ -22,24 +31,13 @@ h1, h2 {
     margin: 1rem 0;
 }
 
-.header {
-    padding: 2rem 0;
-}
-
-.greeting {
-    font-size: 1.5rem; /* Font boyutunu ayarla */
-    color: #b0b0b0; /* Daha yumuşak bir renk */
-    text-align: center; /* Metni ortala */
-    margin: 0.5rem 0 2rem; /* Marjı ayarla */
-    font-weight: 400; /* Daha hafif yazı ağırlığı */
-}
-
 .team-list {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     margin: 2rem 0;
-    text-align: center; /* İçeriği ortala */
+    width: 100%; /* Ensure it takes full width */
+    overflow-y: scroll;
 }
 
 .team-member-container {
@@ -47,43 +45,30 @@ h1, h2 {
     padding: 20px;
     border-radius: 10px;
     margin: 10px;
-    width: 250px;
+    min-height: 100px;
+    width: 20%;
     transition: background-color 0.3s, transform 0.3s;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
+@keyframes flash {
+    0% { background-color: rgba(255, 0, 0, 0.2); }
+    50% { background-color: rgba(255, 0, 0, 0.5); }
+    100% { background-color: rgba(255, 0, 0, 0.2); }
+}
+
+.team-member-container.alert {
+    animation: flash 1s infinite; /* Flash effect for alerts */
+}
+
 .team-member-info {
-    text-align: left; /* Bilgileri sola hizala */
+    text-align: left;
 }
 
 .teammate-name {
     color: lightskyblue;
     font-weight: bold;
     margin: 0.5rem 0;
-}
-
-.teammate-role {
-    color: lightgreen;
-    margin: 0;
-}
-
-.status-indicator {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.status-green {
-    background-color: green;
-}
-
-.status-orange {
-    background-color: orange;
-}
-
-.status-red {
-    background-color: red;
 }
 
 .button-container {
@@ -109,10 +94,6 @@ h1, h2 {
     transform: scale(1.05);
 }
 
-.action-button i {
-    pointer-events: none;
-}
-
 .credits-footer {
     text-align: center;
     margin-top: 2rem;
@@ -129,4 +110,139 @@ footer {
     position: relative;
     bottom: 0;
     width: 100%;
+}
+
+#humidityChart {
+    margin-top: 20px;
+    max-width: 100%;
+    width: 100%;
+}
+
+.alert-history {
+    max-height: 150px;
+    overflow-y: auto;
+    background-color: #434343;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.alert-container {
+    background-color: #ffcccb;
+    color: #a00000;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 5px 0;
+}
+
+#dashboard {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.widget {
+    background-color: #434343;
+    border: 1px solid #ccc;
+    margin: 10px;
+    padding: 20px;
+    flex: 1 1 30%;
+    cursor: move;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+}
+
+.widget:hover {
+    background-color: #545454;
+}
+
+.drop-target {
+    border: 2px dashed #ffcccb;
+}
+
+.theme-switcher {
+    margin: 1rem 0;
+}
+
+
+body.light {
+    background-color: #ffffff;
+    color: black;
+}
+body.dark {
+    background-color: #212121;
+    color: white;
+}
+/* Button Styles */
+#theme-toggle {
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.3s, background-color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px; /* Space between text and button */
+}
+#theme-toggle:hover {
+    transform: scale(1.1);
+    background-color: #0056b3;
+}
+/* Animation */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+.pulse-animation {
+    animation: pulse 1.5s infinite;
+}
+.team-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 2rem 0;
+    width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
+}
+.alert-history {
+    max-height: 60%;
+    overflow-y: auto;
+    background-color: #434343;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+.alert-container {
+    background-color: #ffcccb;
+    color: #a00000;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 5px 0;
+}
+#dashboard {
+    display: flex;
+    flex-wrap: wrap;
+}
+.widget {
+    background-color: #434343;
+    border: 1px solid #ccc;
+    margin: 10px;
+    padding: 20px;
+    flex: 1 1 30%;
+    cursor: move;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+}
+.widget:hover {
+    background-color: #545454;
+}
+.drop-target {
+    border: 2px dashed #ffcccb;
 }

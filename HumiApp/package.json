@@ -18,30 +18,54 @@
     "electron": "^32.2.0",
     "electron-builder": "^25.1.8"
   },
-  "build": {
-    "appId": "com.batuhantrkgl-uhcal.humiapp",
-    "productName": "HumiApp",
-    "linux": {
-      "target": [
-        "deb",
-        "AppImage"
-      ],
-      "category": "Utility",
-      "maintainer": "Batuhan Türkoğlu <batuhanturkoglu37@gmail.com>"
-    },
-    "mac": {
-      "target": [
-        "dmg"
-      ],
-      "category": "public.app-category.utilities"
-    },
-    "win": {
-      "target": [
-        "nsis"
-      ]
-    }
+"build": {
+  "appId": "com.batuhantrkgl-uhcal.humiapp",
+  "productName": "HumiApp",
+  "linux": {
+    "target": [
+      {
+        "target": "deb",
+        "arch": [
+          "x64",
+          "arm64"
+        ]
+      },
+      {
+        "target": "AppImage",
+        "arch": [
+          "x64",
+          "arm64"
+        ]
+      }
+    ],
+    "category": "Utility",
+    "maintainer": "Batuhan Türkoğlu <batuhanturkoglu37@gmail.com>"
   },
-  "dependencies": {
+  "mac": {
+    "target": [
+      {
+        "target": "dmg",
+        "arch": [
+          "x64",
+          "arm64"
+        ]
+      }
+    ],
+    "category": "public.app-category.utilities"
+  },
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+          "x64",
+          "ia32"
+        ]
+      }
+    ]
+  }
+},
+"dependencies": {
     "@serialport/parser-readline": "^12.0.0",
     "serialport": "^12.0.0"
   }

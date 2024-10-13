@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HUMI</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <p class="nameholder-no-idea">HUMI - Bitki Bilgi Sistemi</p>
+    <p class="paragraph">Today Is <span id="current-day"></span></p>
+
+    <!-- Dynamic plant sections will be injected here -->
+    <div class="team-list" id="plant-list">
+        <!-- This div will be populated with plant information dynamically -->
+    </div>
+
+    <footer>
+        <div class="credits-footer">
+            <p>Made By Batuhantrkgl@AlrightStudios <br> 2024-2025 All Rights Reserved. <br> Based on DGO.Robotics's Team Website.</p>
+        </div>
+    </footer>
+
+    <script>
+        const isDevMode = true; // Set to true for development mode
+
+        // Function to simulate humidity data in development mode
+        function simulateHumidityData(numPlants) {
+            const mockData = [];
+            for (let i = 0; i < numPlants; i++) {
+                mockData.push({ humidity: (Math.random() * 100).toFixed(2) });
+            }
+            return mockData;
+        }
+
+        // Function to water a specific plant
+        function waterPlant(plantNumber) {
+            alert(`Watering plant ${plantNumber} (simulated)`);
+        }
+
+        // Function to toggle the fan for a specific plant
+        function toggleFan(plantNumber) {
+            alert(`Toggling fan for plant ${plantNumber} (simulated)`);
+        }
+
+        // Placeholder for taking a photo
+        function takePhoto() {
+            alert("Fotoğraf çekme özelliği henüz eklenmedi.");
+        }
+
+        // Function to update humidity readings
+        function updateHumidity() {
+            if (isDevMode) {
+                // Simulate fetching humidity data
+                const simulatedData = simulateHumidityData(5); // Change 5 to however many plants you want to simulate
+                displayPlantData(simulatedData);
+            } else {
+                // Fetch actual data from the Arduino
+                fetch('http://192.168.1.100/humidity')
+                    .then(response => response.json())
+                    .then(data => displayPlantData(data))
+                    .catch(error => console.error('Error:', error));
+            }
+        }
+
+        // Function to display plant data
+        function displayPlantData(data) {
+            const plantList = document.getElementById('plant-list');
+            plantList.innerHTML = ''; // Clear previous plants
+
+            // Loop through each plant's data
+            data.forEach((plant, index) => {
+                const plantContainer = document.createElement('div');
+                plantContainer.classList.add('team-member-container');
+
+                const plantInfo = `
+                    <div class="team-member-info">
+                        <p class="teammate-name">Bitki ${index + 1}</p>
+                        <p>Nem Durumu: <span id="humidity-${index + 1}">${plant.humidity}%</span></p>
+                        <div class="button-container">
+                            <button class="action-button" onclick="takePhoto()">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <button class="action-button" onclick="waterPlant(${index + 1})">
+                                <i class="fas fa-water"></i>
+                            </button>
+                            <button class="action-button" onclick="toggleFan(${index + 1})">
+                                <i class="fas fa-fan"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                plantContainer.innerHTML = plantInfo;
+                plantList.appendChild(plantContainer); // Add the plant container to the main list
+            });
+        }
+
+        // Initialize the webpage
+        document.addEventListener('DOMContentLoaded', function() {
+            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const today = new Date();
+            document.getElementById('current-day').textContent = days[today.getDay()];
+
+            updateHumidity(); // Load humidity data initially
+            setInterval(updateHumidity, 60000); // Update every minute
+        });
+    </script>
+</body>
+</html>
