@@ -1,32 +1,30 @@
-#include <SPI.h>
-#include <Ethernet.h>
+#include <ESP8266WiFi.h>
 #include <DHT.h>
 #include <SD.h>
-#include <SmtpClient.h>
 #include <Wire.h>
 #include <ArduinoJson.h>
 #include <HttpClient.h>
-
-#import <Client.h>
-#import <Mail.h>
-#import <SMTPClient.h>
+#include "SMTPClient.h"  // Include the new SMTPClient header
 
 #define MAX_SENSORS 20
-#define DHTPIN 2       // DHT sensor connected to digital pin 2
+#define DHTPIN 3       // DHT sensor connected to digital pin 2
 #define DHTTYPE DHT11  // DHT 11
 
 DHT dht(DHTPIN, DHTTYPE);
-EthernetServer server(80);
+WiFiServer server(80);
 const int chipSelect = 4;                             // SD card module connected to pin 4
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };  // Your MAC address
-IPAddress ip(192, 168, 1, 100);                       // Your IP address
+
+// Wi-Fi settings
+const char* ssid = "fatih";       // Replace with your Wi-Fi SSID
+const char* password = ""; // Replace with your Wi-Fi password
 
 // SMTP settings
 const char* smtpServer = "smtp.gmail.com";  // Replace with your SMTP server
-IPAddress smtpServerIp(192, 168, 0, 125);   // Replace with your SMTP server's IP
-const int smtpPort = 25;                    // Replace with your SMTP server's port
-EthernetClient ethClient;
-SmtpClient smtp(&ethClient, smtpServerIp, smtpPort);
+const int smtpPort = 465;                   // Replace with your SMTP server's port
+const char* smtpUsername = "your_username"; // Replace with your SMTP username
+const char* smtpPassword = "your_password"; // Replace with your SMTP password
+
+SMTPClient smtpClient;  // Create an instance of the new SMTPClient
 
 const char* senderEmail = "sender@example.com";
 const char* recipientEmail = "recipient@example.com";
@@ -38,7 +36,15 @@ float calibrationOffset[MAX_SENSORS] = { 0.0 };  // Array for calibration offset
 void setup() {
   Serial.begin(9600);
   dht.begin();
-  Ethernet.begin(mac, ip);
+  
+  // Connect to Wi-Fi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to WiFi");
+
   server.begin();
 
   if (!SD.begin(chipSelect)) {
@@ -46,19 +52,23 @@ void setup() {
     return;
   }
 
+  // Initialize the SMTP client
+  smtpClient.begin(smtpServer, smtpPort);
+  smtpClient.setCredentials(smtpUsername, smtpPassword);
+
   // Load recommended humidity and calibration from SD or set defaults
   loadConfig();
   loadCalibration();
 }
 
 void loop() {
-  EthernetClient client = server.available();
+  WiFiClient client = server.available();
   if (client) {
     handleClient(client);
   }
 }
 
-void handleClient(EthernetClient& client) {
+void handleClient(WiFiClient& client) {
   String currentLine = "";
   while (client.connected()) {
     if (client.available()) {
@@ -74,7 +84,7 @@ void handleClient(EthernetClient& client) {
   client.stop();
 }
 
-void processRequest(String& requestLine, EthernetClient& client) {
+void processRequest(String& requestLine, WiFiClient& client) {
   logToSD("Received request: " + requestLine);
   if (requestLine.startsWith("GET /humidity")) {
     sendHumidityData(client);
@@ -96,7 +106,7 @@ void processRequest(String& requestLine, EthernetClient& client) {
   }
 }
 
-void sendPlantCareTips(EthernetClient& client) {
+void sendPlantCareTips(WiFiClient& client) {
   String sdData = readSDCardData();
   String geminiResponse = getGeminiResponse(sdData);
 
@@ -121,8 +131,8 @@ String readSDCardData() {
 }
 
 String getGeminiResponse(const String& data) {
-  EthernetClient ethernetClient;
-  HttpClient http(ethernetClient, "api.google.com", 80);  // Specify the server name and port (default: 80 or 443 for HTTPS)
+  WiFiClient wifiClient;
+  HttpClient http(wifiClient, "api.google.com", 80);  // Specify the server name and port (default: 80 or 443 for HTTPS)
 
   http.beginRequest();
   http.post("/gemini");  // Specify the endpoint path
@@ -148,8 +158,7 @@ String getGeminiResponse(const String& data) {
   return response;
 }
 
-
-void sendHumidityData(EthernetClient& client) {
+void sendHumidityData(WiFiClient& client) {
   String response = "[";
   for (int i = 0; i < numSensors; i++) {
     float humidity = dht.readHumidity() + calibrationOffset[i];  // Apply calibration offset
@@ -204,29 +213,17 @@ void checkHumidity(int index, float humidity) {
 }
 
 void sendEmailAlert(int plantIndex, float currentHumidity) {
-  EthernetClient ethClient;
-  SmtpClient smtp(&ethClient, smtpServer, 587);
-
-  Mail mail;
-  mail.from("Plant Monitor <your-email@example.com>");
-  mail.replyTo("noreply@example.com");
-  mail.to("Owner <owner-email@example.com>");
-  mail.subject("Humidity Alert");
-
+  String subject = "Humidity Alert";
   String body = "Plant " + String(plantIndex + 1) + " is out of range. Current: " + String(currentHumidity) + "%";
-  char bodyArray[body.length() + 1];               // Create a mutable char array
-  body.toCharArray(bodyArray, sizeof(bodyArray));  // Copy the string
-  mail.body(bodyArray);                            // Pass the mutable char array
 
-
-  if (!smtp.send(&mail)) {
-    Serial.println("Failed to send email.");
-    logToSD("Failed to send email alert for plant " + String(plantIndex + 1));
-  } else {
+  if (smtpClient.sendMail(senderEmail, recipientEmail, subject, body)) {
+    Serial.println("Email alert sent successfully!");
     logToSD("Email alert sent for plant " + String(plantIndex + 1) + " with humidity " + String(currentHumidity));
+  } else {
+    Serial.println("Failed to send email alert.");
+    logToSD("Failed to send email alert for plant " + String(plantIndex + 1));
   }
 }
-
 
 void loadConfig() {
   if (SD.exists("config.json")) {
@@ -276,7 +273,7 @@ void saveCalibration() {
   }
 }
 
-void sendResponse(EthernetClient& client, const String& message) {
+void sendResponse(WiFiClient& client, const String& message) {
   client.println("HTTP/1.1 200 OK");
   client.println("Content-Type: text/plain");
   client.println();
