@@ -4,15 +4,24 @@
 #include <Wire.h>
 #include <ArduinoJson.h>
 #include <HttpClient.h>
-#include <SMTPClient.h>  // Include the new SMTPClient header
+#include <SMTPClient.h>
 
 #define MAX_SENSORS 20
-#define DHTPIN 3       // DHT sensor connected to digital pin 3
-#define DHTTYPE DHT11  // DHT 11
+#define DHTPIN1 2       // DHT22 sensor 1 connected to digital pin 2
+#define DHTPIN2 3       // DHT22 sensor 2 connected to digital pin 3
+#define DHTPIN3 4       // DHT22 sensor 3 connected to digital pin 4
+#define DHTTYPE DHT22   // DHT 22 (AM2302)
 
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht1(DHTPIN1, DHTTYPE);
+DHT dht2(DHTPIN2, DHTTYPE);
+DHT dht3(DHTPIN3, DHTTYPE);
+
 WiFiServer server(80);
-const int chipSelect = 4;                             // SD card module connected to pin 4
+const int chipSelect = 10;  // SD card module's CS (Chip Select) connected to pin 10
+
+// Relay pins
+const int waterPumpPins[3] = {5, 6, 7};
+const int fanPins[3] = {8, 9, 10};
 
 // Wi-Fi settings
 const char* ssid = "fatih";       // Replace with your Wi-Fi SSID
@@ -24,19 +33,29 @@ const int smtpPort = 465;                   // Replace with your SMTP server's p
 const char* smtpUsername = "your_username"; // Replace with your SMTP username
 const char* smtpPassword = "your_password"; // Replace with your SMTP password
 
-SMTPClient smtpClient;  // Create an instance of the new SMTPClient
+SMTPClient smtpClient;
 
 const char* senderEmail = "sender@example.com";
 const char* recipientEmail = "recipient@example.com";
 
 float recommendedHumidity[MAX_SENSORS] = { 60.0, 60.0, 60.0 };  // Recommended humidity for each plant
-int numSensors = 0;
+int numSensors = 3;  // Number of sensors
 float calibrationOffset[MAX_SENSORS] = { 0.0 };  // Array for calibration offsets
 
 void setup() {
   Serial.begin(9600);
-  dht.begin();
+  dht1.begin();
+  dht2.begin();
+  dht3.begin();
   
+  // Initialize relay pins
+  for (int i = 0; i < 3; i++) {
+    pinMode(waterPumpPins[i], OUTPUT);
+    digitalWrite(waterPumpPins[i], HIGH); // Turn off the water pumps initially
+    pinMode(fanPins[i], OUTPUT);
+    digitalWrite(fanPins[i], HIGH); // Turn off the fans initially
+  }
+
   // Connect to Wi-Fi
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -44,11 +63,12 @@ void setup() {
     Serial.println("Connecting to WiFi...");
   }
   Serial.println("Connected to WiFi");
+  Serial.println("IP:" + WiFi.localIP());
 
   server.begin();
 
   if (!SD.begin(chipSelect)) {
-    Serial.println("SD Card initialization failed!");
+    Serial.println("SD Card initialization failed! It may not be present or properly connected. Please check the connections and SDCard itself.");
     return;
   }
 
@@ -136,7 +156,7 @@ String getGeminiResponse(const String& data) {
 
   http.beginRequest();
   http.post("/gemini");  // Specify the endpoint path
-  http.sendHeader("Authorization", "Bearer YOUR_GEMINI_API_KEY");
+  http.sendHeader("Authorization", "Bearer YOUR_GEMINI_API_KEY"); // Replace with your Gemini API key
   http.sendHeader("Content-Type", "application/json");
 
   StaticJsonDocument<1024> doc;
@@ -161,7 +181,14 @@ String getGeminiResponse(const String& data) {
 void sendHumidityData(WiFiClient& client) {
   String response = "[";
   for (int i = 0; i < numSensors; i++) {
-    float humidity = dht.readHumidity() + calibrationOffset[i];  // Apply calibration offset
+    float humidity;
+    if (i == 0) {
+      humidity = dht1.readHumidity() + calibrationOffset[i];  // Apply calibration offset
+    } else if (i == 1) {
+      humidity = dht2.readHumidity() + calibrationOffset[i];  // Apply calibration offset
+    } else if (i == 2) {
+      humidity = dht3.readHumidity() + calibrationOffset[i];  // Apply calibration offset
+    }
     checkHumidity(i, humidity);
 
     // Log to SD card
@@ -195,15 +222,30 @@ void calibrateSensor(int plantNum, float offset) {
 }
 
 void waterPlant(int plantNum) {
-  Serial.println("Watering plant " + String(plantNum));
-  logToSD("Watering plant " + String(plantNum));
-  // Add your watering mechanism here
+  if (plantNum >= 1 && plantNum <= 3) {
+    int pumpIndex = plantNum - 1;
+    digitalWrite(waterPumpPins[pumpIndex], LOW); // Turn on the water pump
+    delay(5000); // Water for 5 seconds
+    digitalWrite(waterPumpPins[pumpIndex], HIGH); // Turn off the water pump
+    Serial.println("Watering plant " + String(plantNum));
+    logToSD("Watering plant " + String(plantNum));
+  } else {
+    Serial.println("Invalid plant number: " + String(plantNum));
+    logToSD("Invalid plant number: " + String(plantNum));
+  }
 }
 
 void toggleFan(int plantNum) {
-  Serial.println("Toggling fan for plant " + String(plantNum));
-  logToSD("Toggling fan for plant " + String(plantNum));
-  // Add your fan control mechanism here
+  if (plantNum >= 1 && plantNum <= 3) {
+    int fanIndex = plantNum - 1;
+    int currentState = digitalRead(fanPins[fanIndex]);
+    digitalWrite(fanPins[fanIndex], !currentState); // Toggle the fan state
+    Serial.println("Toggling fan for plant " + String(plantNum));
+    logToSD("Toggling fan for plant " + String(plantNum));
+  } else {
+    Serial.println("Invalid plant number: " + String(plantNum));
+    logToSD("Invalid plant number: " + String(plantNum));
+  }
 }
 
 void checkHumidity(int index, float humidity) {
