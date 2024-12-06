@@ -1,13 +1,13 @@
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include <DHT.h>
 #include <SD.h>
 #include <Wire.h>
 #include <ArduinoJson.h>
 #include <HttpClient.h>
-#include "SMTPClient.h"  // Include the new SMTPClient header
+#include <SMTPClient.h>  // Include the new SMTPClient header
 
 #define MAX_SENSORS 20
-#define DHTPIN 3       // DHT sensor connected to digital pin 2
+#define DHTPIN 3       // DHT sensor connected to digital pin 3
 #define DHTTYPE DHT11  // DHT 11
 
 DHT dht(DHTPIN, DHTTYPE);

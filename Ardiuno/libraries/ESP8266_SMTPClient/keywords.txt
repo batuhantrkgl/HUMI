@@ -1,0 +1,14 @@
+# Syntax Coloring Map For SMTPClient
+
+# Datatypes (KEYWORD1)
+SMTPClient    KEYWORD1
+
+# Methods and Functions (KEYWORD2)
+begin    KEYWORD2
+setCredentials    KEYWORD2
+sendMail    KEYWORD2
+sendMailWithAttachment    KEYWORD2
+
+# Instances (KEYWORD2)
+
+# Constants (LITERAL1)
